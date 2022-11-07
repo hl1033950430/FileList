@@ -17,8 +17,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void getFileTree(FileItem *item, bool cache);
-    void getFileTree2(FileItem *root, QDir &dir);
+    void getFileTree(FileItem *root, QDir &dir);
     QTreeWidgetItem * getTree(FileItem *item);
     QString showFileSize(long long size);
 

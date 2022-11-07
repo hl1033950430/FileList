@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
+#include <QMessageBox>
 #include "fileitem.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -16,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QTreeWidget *fileTree = ui->fileTree;
     QPushButton *queryButton = ui->queryButton;
-    QPushButton *openButton = ui->openButton;
+    QLineEdit *lineEdit = ui->path;
 
     // 初始化文件列表
     QStringList titles;
@@ -26,22 +27,32 @@ MainWindow::MainWindow(QWidget *parent)
     fileTree->setColumnCount(3);
     fileTree->setHeaderLabels(titles);
 
-    // 生成文件树
-    FileItem root;
-    root.fileName = "7-Zip";
-    root.absolutePath = "D:\\";
-    root.isDir = true;
-    QDir dir(root.absolutePath);
-    dir.setFilter(QDir::NoDotAndDotDot | QDir::NoSymLinks | QDir::Dirs | QDir::Files | QDir::Hidden);
-    getFileTree(&root, dir);
+    connect(queryButton, &QPushButton::clicked, [=](){
+        // 获取输入框的文本
+        QString pathText = lineEdit->text();
+        qDebug() << pathText;
+        // 检查目录是否合法
+        // 生成结构树
+        // 生成文件树
+        FileItem root;
+        root.fileName = pathText;
+        root.absolutePath = pathText;
+        root.isDir = true;
+        QDir dir(root.absolutePath);
+        if (!dir.exists()) {
+            QMessageBox::critical(this, "错误", "目录不存在");
+        }
+        dir.setFilter(QDir::NoDotAndDotDot | QDir::NoSymLinks | QDir::Dirs | QDir::Files | QDir::Hidden);
+        getFileTree(&root, dir);
 
-    // 转换成显示的树
-    QTreeWidgetItem *tree = getTree(&root);
-    fileTree->addTopLevelItem(tree);
+        // 转换成显示的树
+        QTreeWidgetItem *tree = getTree(&root);
+        fileTree->clear();
+        fileTree->addTopLevelItem(tree);
+    });
 
-    connect(ui->openButton, &QPushButton::clicked, [=](){
-        this->path = QFileDialog::getOpenFileName(this, "");
-        qDebug() << this->path;
+    connect(lineEdit, &QLineEdit::returnPressed, [=](){
+        emit queryButton->clicked();
     });
 
 }
